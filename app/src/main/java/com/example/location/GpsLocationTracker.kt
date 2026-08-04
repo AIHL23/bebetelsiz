@@ -90,7 +90,8 @@ class GpsLocationTracker(private val context: Context) {
                 Log.e("GpsLocationTracker", "SecurityException on lastLocation: ${e.message}")
             }
 
-            val priority = if (isGpsEnabled) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY
+            val hasFinePermission = fineLocation == PackageManager.PERMISSION_GRANTED
+            val priority = if (isGpsEnabled && hasFinePermission) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY
             val locationRequest = LocationRequest.Builder(priority, 5000L)
                 .setMinUpdateIntervalMillis(3000L)
                 .build()
