@@ -1,6 +1,6 @@
 {
-  "name": "Ebeveyn Kontrolü",
-  "description": "Güvenli Bebek İzleme ve Ebeveyn Kontrol Paneli",
+  "name": "Çocuk Dostu",
+  "description": "Çocuk Dostu Bebek İzleme ve Ebeveyn Kontrol Uygulaması",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
