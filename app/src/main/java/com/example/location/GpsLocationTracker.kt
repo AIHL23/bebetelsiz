@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationManager
 import android.os.Looper
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -63,7 +64,34 @@ class GpsLocationTracker(private val context: Context) {
         }
 
         try {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+            val isGpsEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
+            val isNetworkEnabled = locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true
+
+            if (!isGpsEnabled && !isNetworkEnabled) {
+                Log.w("GpsLocationTracker", "No location providers enabled.")
+                return
+            }
+
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { lastLocation: Location? ->
+                    if (lastLocation != null) {
+                        val newGps = LiveGpsLocation(
+                            latitude = lastLocation.latitude,
+                            longitude = lastLocation.longitude,
+                            accuracy = lastLocation.accuracy,
+                            addressName = "Enlem: %.4f, Boylam: %.4f".format(lastLocation.latitude, lastLocation.longitude),
+                            timestamp = System.currentTimeMillis()
+                        )
+                        _locationState.value = newGps
+                    }
+                }
+            } catch (e: SecurityException) {
+                Log.e("GpsLocationTracker", "SecurityException on lastLocation: ${e.message}")
+            }
+
+            val priority = if (isGpsEnabled) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY
+            val locationRequest = LocationRequest.Builder(priority, 5000L)
                 .setMinUpdateIntervalMillis(3000L)
                 .build()
 
@@ -72,6 +100,8 @@ class GpsLocationTracker(private val context: Context) {
                 locationCallback,
                 Looper.getMainLooper()
             )
+        } catch (e: SecurityException) {
+            Log.e("GpsLocationTracker", "SecurityException requesting location updates: ${e.message}")
         } catch (e: Exception) {
             Log.e("GpsLocationTracker", "Error requesting location updates: ${e.message}")
         }
